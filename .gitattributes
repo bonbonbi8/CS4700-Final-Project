@@ -1,0 +1,41 @@
+# --- Normalize line endings ---
+* text=auto
+
+# --- Unity text assets (force LF so diffs/merges behave) ---
+*.meta           text eol=lf
+*.unity          text eol=lf
+*.prefab         text eol=lf
+*.anim           text eol=lf
+*.controller     text eol=lf
+*.mat            text eol=lf
+*.shader         text eol=lf
+*.guiskin        text eol=lf
+*.asmdef         text eol=lf
+*.json           text eol=lf
+*.yaml           text eol=lf
+*.yml            text eol=lf
+*.cginc          text eol=lf
+*.hlsl           text eol=lf
+*.compute        text eol=lf
+*.cs             text eol=lf
+
+# --- Binary assets (never diff) ---
+*.png            binary
+*.jpg            binary
+*.jpeg           binary
+*.psd            binary
+*.tga            binary
+*.fbx            binary
+*.wav            binary
+*.mp3            binary
+*.ogg            binary
+*.mp4            binary
+*.ttf            binary
+*.otf            binary
+
+# --- Git LFS (optional; only if you enable LFS) ---
+# Uncomment if you’ll store big binaries in Git LFS.
+# *.wav filter=lfs diff=lfs merge=lfs -text
+# *.mp3 filter=lfs diff=lfs merge=lfs -text
+# *.psd filter=lfs diff=lfs merge=lfs -text
+# *.mp4 filter=lfs diff=lfs merge=lfs -text
