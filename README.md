@@ -182,5 +182,4 @@ All required features are implemented:
 
 ## Video Demonstration
 
-[Add your YouTube link here after recording]
-
+https://youtu.be/_LE_IHNQ1Vo
