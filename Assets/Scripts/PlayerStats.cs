@@ -22,10 +22,12 @@ public class PlayerStats : MonoBehaviour
     public float hydrationDecayRate = 0.8f; // Per second
     public float hydrationDecayInterval = 1f; // How often to decay
 
-    [Header("Death Handling")]
-    public float lowStatThreshold = 20f; // Health damage when hunger/thirst is low
+    [Header("Damage When Low")]
+    public float lowStatThreshold = 20f;
+    public float starvingDamage = 1f;
+    public float dehydratedDamage = 1.5f;
 
-    // Events
+    // Events for UI
     public UnityEvent<float> OnHealthChanged;
     public UnityEvent<float> OnHungerChanged;
     public UnityEvent<float> OnHydrationChanged;
@@ -37,21 +39,19 @@ public class PlayerStats : MonoBehaviour
 
     void Start()
     {
-        // Initialize stats
         currentHealth = maxHealth;
         currentHunger = maxHunger;
         currentHydration = maxHydration;
 
-        // Start decay coroutines
-        StartCoroutines();
+        StartStatCoroutines();
 
-        // Trigger initial UI updates
+        // Initial UI update
         OnHealthChanged?.Invoke(currentHealth);
         OnHungerChanged?.Invoke(currentHunger);
         OnHydrationChanged?.Invoke(currentHydration);
     }
 
-    void StartCoroutines()
+    void StartStatCoroutines()
     {
         if (hungerDecayCoroutine != null) StopCoroutine(hungerDecayCoroutine);
         if (hydrationDecayCoroutine != null) StopCoroutine(hydrationDecayCoroutine);
@@ -62,52 +62,41 @@ public class PlayerStats : MonoBehaviour
         healthRegenCoroutine = StartCoroutine(HealthRegenCoroutine());
     }
 
-    // Hunger decay coroutine
     IEnumerator HungerDecayCoroutine()
     {
         while (true)
         {
             yield return new WaitForSeconds(hungerDecayInterval);
-            
-            if (currentHunger > 0)
-            {
-                currentHunger = Mathf.Max(0, currentHunger - hungerDecayRate * hungerDecayInterval);
-                OnHungerChanged?.Invoke(currentHunger);
 
-                // Take health damage if hunger is too low
-                if (currentHunger <= lowStatThreshold)
-                {
-                    TakeDamage(1f * hungerDecayInterval);
-                }
+            currentHunger = Mathf.Max(0, currentHunger - hungerDecayRate * hungerDecayInterval);
+            OnHungerChanged?.Invoke(currentHunger);
+
+            if (currentHunger <= lowStatThreshold)
+            {
+                TakeDamage(starvingDamage * hungerDecayInterval);
             }
         }
     }
 
-    // Hydration decay coroutine
     IEnumerator HydrationDecayCoroutine()
     {
         while (true)
         {
             yield return new WaitForSeconds(hydrationDecayInterval);
-            
-            if (currentHydration > 0)
-            {
-                currentHydration = Mathf.Max(0, currentHydration - hydrationDecayRate * hydrationDecayInterval);
-                OnHydrationChanged?.Invoke(currentHydration);
 
-                // Take health damage if hydration is too low
-                if (currentHydration <= lowStatThreshold)
-                {
-                    TakeDamage(1.5f * hydrationDecayInterval);
-                }
+            currentHydration = Mathf.Max(0, currentHydration - hydrationDecayRate * hydrationDecayInterval);
+            OnHydrationChanged?.Invoke(currentHydration);
+
+            if (currentHydration <= lowStatThreshold)
+            {
+                TakeDamage(dehydratedDamage * hydrationDecayInterval);
             }
         }
     }
 
-    // Health regeneration coroutine
     IEnumerator HealthRegenCoroutine()
     {
-        float timeSinceLastDamage = 0f;
+        float timer = 0f;
 
         while (true)
         {
@@ -115,8 +104,8 @@ public class PlayerStats : MonoBehaviour
 
             if (currentHealth < maxHealth && currentHunger > lowStatThreshold && currentHydration > lowStatThreshold)
             {
-                timeSinceLastDamage += 0.1f;
-                if (timeSinceLastDamage >= healthRegenDelay && healthRegenRate > 0)
+                timer += 0.1f;
+                if (timer >= healthRegenDelay && healthRegenRate > 0)
                 {
                     currentHealth = Mathf.Min(maxHealth, currentHealth + healthRegenRate * 0.1f);
                     OnHealthChanged?.Invoke(currentHealth);
@@ -124,12 +113,15 @@ public class PlayerStats : MonoBehaviour
             }
             else
             {
-                timeSinceLastDamage = 0f;
+                timer = 0f;
             }
         }
     }
 
-    // Public methods to modify stats
+    // ---------------------------
+    // Public methods
+    // ---------------------------
+
     public void RestoreHealth(float amount)
     {
         currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
@@ -163,8 +155,8 @@ public class PlayerStats : MonoBehaviour
     public float GetHealth() => currentHealth;
     public float GetHunger() => currentHunger;
     public float GetHydration() => currentHydration;
+
     public float GetHealthPercent() => currentHealth / maxHealth;
     public float GetHungerPercent() => currentHunger / maxHunger;
     public float GetHydrationPercent() => currentHydration / maxHydration;
 }
-

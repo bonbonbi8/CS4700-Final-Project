@@ -1,95 +1,106 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 
 public class Inventory : MonoBehaviour
 {
     [Header("Inventory Settings")]
     public int maxSlots = 20;
 
-    // Dictionary: ItemData -> quantity
+    // Internal storage: ItemData → Quantity
     private Dictionary<ItemData, int> items = new Dictionary<ItemData, int>();
 
-    // Events for UI updates
-    public event Action<ItemData, int> OnItemAdded;
-    public event Action<ItemData, int> OnItemRemoved;
+    // UI event
     public event Action OnInventoryChanged;
 
-    // Get count of specific item
-    public int GetItemCount(ItemData item)
-    {
-        if (item == null) return 0;
-        return items.ContainsKey(item) ? items[item] : 0;
-    }
-
-    // Add item to inventory
+    // ---------------------------------------------------
+    // ADD ITEM
+    // ---------------------------------------------------
     public bool AddItem(ItemData item, int quantity = 1)
     {
-        if (item == null) return false;
+        if (item == null || quantity <= 0)
+            return false;
 
-        if (items.ContainsKey(item))
+        // If new item and no space → fail
+        if (!items.ContainsKey(item))
         {
-            items[item] += quantity;
-        }
-        else
-        {
-            // Check if we have space for a new item type
             if (items.Count >= maxSlots)
             {
-                Debug.LogWarning("Inventory is full!");
+                Debug.Log("Inventory full: " + item.itemName);
                 return false;
             }
-            items[item] = quantity;
+            items[item] = 0;
         }
 
-        // Clamp to max stack size
-        if (items[item] > item.maxStackSize)
-        {
-            int excess = items[item] - item.maxStackSize;
-            items[item] = item.maxStackSize;
-            OnItemAdded?.Invoke(item, item.maxStackSize - (items[item] - quantity));
-            OnInventoryChanged?.Invoke();
-            return false; // Couldn't add all items
-        }
+        int current = items[item];
+        int maxStack = item.maxStackSize > 0 ? item.maxStackSize : int.MaxValue;
 
-        OnItemAdded?.Invoke(item, quantity);
+        current += quantity;
+        current = Mathf.Clamp(current, 0, maxStack);
+
+        items[item] = current;
+
         OnInventoryChanged?.Invoke();
         return true;
     }
 
-    // Remove item from inventory
+    // ---------------------------------------------------
+    // REMOVE ITEM
+    // ---------------------------------------------------
     public bool RemoveItem(ItemData item, int quantity = 1)
     {
-        if (item == null || !items.ContainsKey(item)) return false;
+        if (item == null || quantity <= 0)
+            return false;
 
-        if (items[item] <= quantity)
-        {
-            int removed = items[item];
+        if (!items.TryGetValue(item, out int current))
+            return false;
+
+        current -= quantity;
+
+        if (current <= 0)
             items.Remove(item);
-            OnItemRemoved?.Invoke(item, removed);
-            OnInventoryChanged?.Invoke();
-            return true;
-        }
         else
-        {
-            items[item] -= quantity;
-            OnItemRemoved?.Invoke(item, quantity);
-            OnInventoryChanged?.Invoke();
-            return true;
-        }
+            items[item] = current;
+
+        OnInventoryChanged?.Invoke();
+        return true;
     }
 
-    // Get all items as a list
+    // ---------------------------------------------------
+    // GET QUANTITY
+    // ---------------------------------------------------
+    public int GetQuantity(ItemData item)
+    {
+        if (item == null) return 0;
+        return items.TryGetValue(item, out int q) ? q : 0;
+    }
+
+    // ---------------------------------------------------
+    // COMPATIBILITY FOR OTHER SCRIPTS
+    // ---------------------------------------------------
+    public int GetItemCount(ItemData item)
+    {
+        return GetQuantity(item);
+    }
+
+    // ---------------------------------------------------
+    // GET ALL ITEMS (for UI)
+    // ---------------------------------------------------
     public Dictionary<ItemData, int> GetAllItems()
     {
         return new Dictionary<ItemData, int>(items);
     }
 
-    // Check if inventory has space
-    public bool HasSpace()
+    // ---------------------------------------------------
+    // CHECK SPACE
+    // ---------------------------------------------------
+    public bool HasSpaceFor(ItemData item)
     {
+        if (item == null) return false;
+
+        if (items.ContainsKey(item))
+            return true; // stackable
+
         return items.Count < maxSlots;
     }
 }
-

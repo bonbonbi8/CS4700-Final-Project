@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7b43dedce7065444ba150879030edce, type: 3}
+  m_Name: Health Portion Recipe
+  m_EditorClassIdentifier: 
+  recipeName: Health Portion Recipe
+  description: 
+  requiredMaterials:
+  - material: {fileID: 11400000, guid: f325e0c5d4bbeaf4595eaa364ac9a1bf, type: 2}
+    quantity: 2
+  - material: {fileID: 11400000, guid: 10a1e65e5fbd7144681223b48854284f, type: 2}
+    quantity: 1
+  outputItem: {fileID: 11400000, guid: 2994c3ee5649ab742b199de927190d03, type: 2}
+  outputQuantity: 1
+  isUnlockedByDefault: 1
+  unlockCondition: 

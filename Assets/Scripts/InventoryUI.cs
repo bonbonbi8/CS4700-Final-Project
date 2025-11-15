@@ -6,108 +6,114 @@ using TMPro;
 public class InventoryUI : MonoBehaviour
 {
     [Header("UI References")]
-    public GameObject inventoryPanel;
-    public Transform inventorySlotParent;
-    public GameObject inventorySlotPrefab;
+    public GameObject inventoryPanel;       // Panel toggled with I
+    public Transform inventorySlotParent;   // Parent for all slot instances
+    public GameObject inventorySlotPrefab;  // Prefab with Image + TMP_Text + Button
 
     private Inventory playerInventory;
-    private List<GameObject> slotObjects = new List<GameObject>();
+    private ItemConsumer itemConsumer;
 
     void Start()
     {
-        // Find player inventory
+        // Start closed
+        if (inventoryPanel != null)
+            inventoryPanel.SetActive(false);
+
+        // Find the player's inventory + item consumer
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
             playerInventory = player.GetComponent<Inventory>();
-            
+            itemConsumer = player.GetComponent<ItemConsumer>();
+
             if (playerInventory != null)
             {
                 playerInventory.OnInventoryChanged += RefreshInventory;
+                RefreshInventory();
+            }
+            else
+            {
+                Debug.LogWarning("InventoryUI: Player has no Inventory component!");
+            }
+
+            if (itemConsumer == null)
+            {
+                Debug.LogWarning("InventoryUI: Player has no ItemConsumer component!");
             }
         }
-
-        // Setup UI
-        if (inventoryPanel != null)
+        else
         {
-            inventoryPanel.SetActive(false);
+            Debug.LogWarning("InventoryUI: No GameObject tagged 'Player' found.");
         }
-
-        RefreshInventory();
     }
 
     void Update()
     {
-        // Toggle inventory with 'I' key
-        if (Input.GetKeyDown(KeyCode.I))
+        if (Input.GetKeyDown(KeyCode.I) && inventoryPanel != null)
         {
-            ToggleInventory();
+            bool newState = !inventoryPanel.activeSelf;
+            inventoryPanel.SetActive(newState);
+
+            if (newState && playerInventory != null)
+            {
+                RefreshInventory();
+            }
         }
     }
 
-    public void ToggleInventory()
+    private void RefreshInventory()
     {
-        if (inventoryPanel != null)
+        if (inventorySlotParent == null || playerInventory == null)
+            return;
+
+        // Clear existing UI slots
+        for (int i = inventorySlotParent.childCount - 1; i >= 0; i--)
         {
-            inventoryPanel.SetActive(!inventoryPanel.activeSelf);
+            Destroy(inventorySlotParent.GetChild(i).gameObject);
         }
-    }
 
-    void RefreshInventory()
-    {
-        if (inventorySlotParent == null || inventorySlotPrefab == null || playerInventory == null) return;
+        // Build new slots from inventory contents
+        Dictionary<ItemData, int> items = playerInventory.GetAllItems();
 
-        // Clear existing slots
-        foreach (var slot in slotObjects)
-        {
-            if (slot != null) Destroy(slot);
-        }
-        slotObjects.Clear();
-
-        // Create slots for each item
-        var items = playerInventory.GetAllItems();
-        foreach (var kvp in items)
+        foreach (KeyValuePair<ItemData, int> kvp in items)
         {
             ItemData item = kvp.Key;
             int quantity = kvp.Value;
 
-            GameObject slotObj = Instantiate(inventorySlotPrefab, inventorySlotParent);
-            
-            // Setup slot UI
-            Image iconImage = slotObj.GetComponentInChildren<Image>();
-            TextMeshProUGUI quantityText = slotObj.GetComponentInChildren<TextMeshProUGUI>();
-            Button slotButton = slotObj.GetComponent<Button>();
+            GameObject slotGO = Instantiate(inventorySlotPrefab, inventorySlotParent);
 
-            if (iconImage != null && item.icon != null)
+            // Find child components: Image for icon, TMP_Text for quantity
+            Image iconImage = slotGO.GetComponentInChildren<Image>();
+            TMP_Text qtyText = slotGO.GetComponentInChildren<TMP_Text>();
+
+            if (iconImage != null && item != null)
             {
                 iconImage.sprite = item.icon;
             }
 
-            if (quantityText != null)
+            if (qtyText != null)
             {
-                quantityText.text = quantity > 1 ? quantity.ToString() : "";
+                qtyText.text = quantity > 1 ? quantity.ToString() : "";
             }
 
-            // Add click handler for consumables
-            if (slotButton != null && item.itemType == ItemData.ItemType.Consumable)
-            {
-                ItemData itemRef = item; // Capture for closure
-                slotButton.onClick.AddListener(() => OnConsumableClicked(itemRef));
-            }
+            slotGO.name = item != null ? item.itemName + "_Slot" : "EmptySlot";
 
-            slotObjects.Add(slotObj);
-        }
-    }
-
-    void OnConsumableClicked(ItemData item)
-    {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-        {
-            ItemConsumer consumer = player.GetComponent<ItemConsumer>();
-            if (consumer != null)
+            // Hook up button to consume the item
+            Button button = slotGO.GetComponent<Button>();
+            if (button != null && item != null)
             {
-                consumer.ConsumeItem(item);
+                ItemData capturedItem = item; // capture for lambda
+                button.onClick.AddListener(() =>
+                {
+                    if (itemConsumer != null)
+                    {
+                        bool consumed = itemConsumer.ConsumeItem(capturedItem);
+                        if (consumed)
+                        {
+                            RefreshInventory(); // refresh after use
+                        }
+                    }
+                });
             }
         }
     }
@@ -120,4 +126,3 @@ public class InventoryUI : MonoBehaviour
         }
     }
 }
-
