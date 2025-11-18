@@ -12,6 +12,7 @@ public class InventoryUI : MonoBehaviour
 
     private Inventory playerInventory;
     private ItemConsumer itemConsumer;
+    private EquipmentSystem equipmentSystem;
 
     void Start()
     {
@@ -19,12 +20,13 @@ public class InventoryUI : MonoBehaviour
         if (inventoryPanel != null)
             inventoryPanel.SetActive(false);
 
-        // Find the player's inventory + item consumer
+        // Find player + systems
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
             playerInventory = player.GetComponent<Inventory>();
             itemConsumer = player.GetComponent<ItemConsumer>();
+            equipmentSystem = player.GetComponent<EquipmentSystem>();
 
             if (playerInventory != null)
             {
@@ -37,9 +39,10 @@ public class InventoryUI : MonoBehaviour
             }
 
             if (itemConsumer == null)
-            {
                 Debug.LogWarning("InventoryUI: Player has no ItemConsumer component!");
-            }
+
+            if (equipmentSystem == null)
+                Debug.LogWarning("InventoryUI: Player has no EquipmentSystem component!");
         }
         else
         {
@@ -82,39 +85,53 @@ public class InventoryUI : MonoBehaviour
 
             GameObject slotGO = Instantiate(inventorySlotPrefab, inventorySlotParent);
 
-            // Find child components: Image for icon, TMP_Text for quantity
+            // Icon + quantity text
             Image iconImage = slotGO.GetComponentInChildren<Image>();
             TMP_Text qtyText = slotGO.GetComponentInChildren<TMP_Text>();
 
             if (iconImage != null && item != null)
-            {
                 iconImage.sprite = item.icon;
-            }
 
             if (qtyText != null)
-            {
                 qtyText.text = quantity > 1 ? quantity.ToString() : "";
-            }
 
             slotGO.name = item != null ? item.itemName + "_Slot" : "EmptySlot";
 
-            // Hook up button to consume the item
+            // Button behavior
             Button button = slotGO.GetComponent<Button>();
             if (button != null && item != null)
             {
                 ItemData capturedItem = item; // capture for lambda
                 button.onClick.AddListener(() =>
                 {
-                    if (itemConsumer != null)
-                    {
-                        bool consumed = itemConsumer.ConsumeItem(capturedItem);
-                        if (consumed)
-                        {
-                            RefreshInventory(); // refresh after use
-                        }
-                    }
+                    HandleItemClick(capturedItem);
+                    RefreshInventory(); // refresh after use/equip
                 });
             }
+        }
+    }
+
+    private void HandleItemClick(ItemData item)
+    {
+        if (item == null) return;
+
+        switch (item.itemType)
+        {
+            case ItemData.ItemType.Consumable:
+                if (itemConsumer != null)
+                    itemConsumer.ConsumeItem(item);
+                break;
+
+            case ItemData.ItemType.Weapon:
+            case ItemData.ItemType.Tool:
+                if (equipmentSystem != null)
+                    equipmentSystem.EquipItem(item);
+                break;
+
+            // Materials etc. do nothing for now
+            default:
+                Debug.Log("Clicked on " + item.itemName + " (no direct action yet).");
+                break;
         }
     }
 

@@ -16,10 +16,10 @@ MonoBehaviour:
   description: 
   icon: {fileID: 0}
   maxStackSize: 1
-  itemType: 3
+  itemType: 2
   healthRestore: 0
   hungerRestore: 0
   hydrationRestore: 0
   damage: 15
   attackRange: 1.5
-  attackCooldown: 0.8
+  attackCooldown: 0.6

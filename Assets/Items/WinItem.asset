@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00edb3e0662650447962ae9325685897, type: 3}
-  m_Name: Health Portion
+  m_Name: WinItem
   m_EditorClassIdentifier: 
-  itemName: Health Portion
+  itemName: Escape Beacon
   description: 
-  icon: {fileID: 0}
-  maxStackSize: 5
-  itemType: 1
-  healthRestore: 30
+  icon: {fileID: 1105920434, guid: f6c3faeac83b7654b92e795e8ef9fddf, type: 3}
+  maxStackSize: 1
+  itemType: 0
+  healthRestore: 0
   hungerRestore: 0
   hydrationRestore: 0
   damage: 0

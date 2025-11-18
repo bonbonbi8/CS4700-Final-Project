@@ -2,7 +2,9 @@ using UnityEngine;
 
 /// <summary>
 /// Handles cold/warmth effects for the player.
-/// Stay near a lit campfire to stay safe; away from fire you take cold damage.
+/// - Stay near a lit campfire to be safe (and regen health).
+/// - Away from any lit campfire, you take cold damage.
+/// - At night, cold damage can be multiplied.
 /// </summary>
 [RequireComponent(typeof(PlayerStats))]
 public class PlayerSurvival : MonoBehaviour
@@ -15,10 +17,14 @@ public class PlayerSurvival : MonoBehaviour
     public float healthRegenNearFire = 2f;
 
     [Header("Cold Damage Settings")]
-    [Tooltip("Health per second lost when NOT near a lit campfire.")]
+    [Tooltip("Health per second lost when NOT near a lit campfire (base value).")]
     public float coldDamagePerSecond = 3f;
 
+    [Tooltip("Multiplier applied to cold damage at night.")]
+    public float nightColdMultiplier = 2f;
+
     private PlayerStats playerStats;
+    private DayNightCycle dayNight;
 
     void Start()
     {
@@ -26,6 +32,12 @@ public class PlayerSurvival : MonoBehaviour
         if (playerStats == null)
         {
             Debug.LogWarning("PlayerSurvival: No PlayerStats found on Player.");
+        }
+
+        dayNight = FindObjectOfType<DayNightCycle>();
+        if (dayNight == null)
+        {
+            Debug.Log("PlayerSurvival: No DayNightCycle found in scene (night multiplier will be ignored).");
         }
     }
 
@@ -46,17 +58,23 @@ public class PlayerSurvival : MonoBehaviour
         }
         else
         {
-            // Take cold damage when away from fire
-            if (coldDamagePerSecond > 0f)
+            // Take cold damage when away from any lit fire
+            float dmg = coldDamagePerSecond;
+
+            if (dayNight != null && dayNight.IsNight)
             {
-                playerStats.TakeDamage(coldDamagePerSecond * Time.deltaTime);
+                dmg *= nightColdMultiplier;
+            }
+
+            if (dmg > 0f)
+            {
+                playerStats.TakeDamage(dmg * Time.deltaTime);
             }
         }
     }
 
     private bool IsNearLitCampfire()
     {
-        // Look for any Campfire collider in range
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, warmthRange);
 
         foreach (Collider2D hit in hits)
@@ -73,7 +91,6 @@ public class PlayerSurvival : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        // Draw warmth radius in Scene view
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, warmthRange);
     }
