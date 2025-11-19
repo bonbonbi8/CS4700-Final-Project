@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerCombat : MonoBehaviour
 {
@@ -17,22 +16,25 @@ public class PlayerCombat : MonoBehaviour
     private Animator animator;
     private bool isAttacking = false;
 
+    [Header("Input")]
+    public KeyCode attackKey = KeyCode.Space;
+
     void Awake()
     {
         animator = GetComponent<Animator>();
-        
+
         if (attackPoint == null)
         {
             GameObject point = new GameObject("AttackPoint");
             point.transform.SetParent(transform);
-            point.transform.localPosition = Vector3.up * 0.5f; // Above player
+            point.transform.localPosition = Vector3.up * 0.5f;
             attackPoint = point.transform;
         }
     }
 
     void Start()
     {
-        // Set enemy layer if not set
+        // Default enemy layer if not set
         if (enemyLayer.value == 0)
         {
             enemyLayer = LayerMask.GetMask("Enemy");
@@ -41,13 +43,7 @@ public class PlayerCombat : MonoBehaviour
 
     void Update()
     {
-        // Attack input handled via Input System
-    }
-
-    // Called by Input System
-    private void OnAttack(InputValue value)
-    {
-        if (value.isPressed && !isAttacking)
+        if (Input.GetKeyDown(attackKey) && !isAttacking)
         {
             PerformAttack();
         }
@@ -56,7 +52,7 @@ public class PlayerCombat : MonoBehaviour
     public void SetWeapon(ItemData weapon)
     {
         currentWeapon = weapon;
-        
+
         if (weapon != null)
         {
             attackRange = weapon.attackRange;
@@ -71,13 +67,11 @@ public class PlayerCombat : MonoBehaviour
 
     void PerformAttack()
     {
-        // Check cooldown
+        // Cooldown check
         if (Time.time - lastAttackTime < attackCooldown)
-        {
             return;
-        }
 
-        // Check if weapon is equipped
+        // Require a weapon
         if (currentWeapon == null)
         {
             Debug.Log("No weapon equipped!");
@@ -87,16 +81,12 @@ public class PlayerCombat : MonoBehaviour
         lastAttackTime = Time.time;
         isAttacking = true;
 
-        // Trigger attack animation
+        // Animation
         if (animator != null)
-        {
             animator.SetTrigger("Attack");
-        }
 
-        // Perform attack after a short delay (for animation)
+        // Slight delay to match animation
         Invoke(nameof(DealDamage), 0.2f);
-
-        // Reset attack state
         Invoke(nameof(ResetAttackState), attackCooldown);
     }
 
@@ -130,7 +120,6 @@ public class PlayerCombat : MonoBehaviour
         isAttacking = false;
     }
 
-    // Visualize attack range in editor
     void OnDrawGizmosSelected()
     {
         if (attackPoint != null)
@@ -140,4 +129,3 @@ public class PlayerCombat : MonoBehaviour
         }
     }
 }
-
