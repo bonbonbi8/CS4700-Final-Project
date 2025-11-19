@@ -181,5 +181,4 @@ All required features are implemented:
 - ✅ UI integration
 
 ## Video Demonstration
-
 https://youtu.be/_LE_IHNQ1Vo
