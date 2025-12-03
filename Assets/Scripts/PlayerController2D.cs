@@ -2,9 +2,17 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Inventory))]
+[RequireComponent(typeof(PlayerStats))]
+[RequireComponent(typeof(ItemConsumer))]
+[RequireComponent(typeof(EquipmentSystem))]
+[RequireComponent(typeof(PlayerCombat))]
 public class PlayerController2D : MonoBehaviour
 {
     public float moveSpeed = 6f;
+
+    [Header("Audio")]
+    [SerializeField] private AudioSource footstepSource;   // assign in Inspector
 
     private Rigidbody2D rb;
     private Vector2 moveInput;
@@ -15,21 +23,53 @@ public class PlayerController2D : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         cam = Camera.main;
+
+        // Ensure player has required tag
+        if (!gameObject.CompareTag("Player"))
+        {
+            gameObject.tag = "Player";
+        }
+
+        // If you forgot to drag the AudioSource in the Inspector,
+        // this will try to grab one from this object or its children.
+        if (footstepSource == null)
+        {
+            footstepSource = GetComponentInChildren<AudioSource>();
+        }
     }
 
     void FixedUpdate()
     {
+        // --- Movement ---
         if (moveInput.sqrMagnitude > 1f) moveInput = moveInput.normalized;
         rb.MovePosition(rb.position + moveInput * moveSpeed * Time.fixedDeltaTime);
 
+        // --- Rotation toward mouse ---
         if (cam)
         {
-            var mouseWorld = cam.ScreenToWorldPoint(new Vector3(mouseScreenPos.x, mouseScreenPos.y, -cam.transform.position.z));
+            var mouseWorld = cam.ScreenToWorldPoint(
+                new Vector3(mouseScreenPos.x, mouseScreenPos.y, -cam.transform.position.z)
+            );
             var dir = (mouseWorld - transform.position);
             if (dir.sqrMagnitude > 0.0001f)
             {
                 float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-                transform.rotation = Quaternion.Euler(0, 0, ang - 90f); // adjust -90 if your sprite’s forward is +X
+                transform.rotation = Quaternion.Euler(0, 0, ang - 90f); // adjust -90 if sprite faces +X
+            }
+        }
+
+        // --- Footstep audio ---
+        if (footstepSource != null)
+        {
+            bool isMoving = moveInput.sqrMagnitude > 0.01f;
+
+            if (isMoving && !footstepSource.isPlaying)
+            {
+                footstepSource.Play();
+            }
+            else if (!isMoving && footstepSource.isPlaying)
+            {
+                footstepSource.Stop();
             }
         }
     }
@@ -38,13 +78,10 @@ public class PlayerController2D : MonoBehaviour
     private void OnMove(InputValue value)
     {
         moveInput = value.Get<Vector2>();
-        Debug.Log("Move input: " + moveInput);
     }
 
     private void OnLook(InputValue value)
     {
         mouseScreenPos = value.Get<Vector2>();
-        Debug.Log("Mouse pos: " + mouseScreenPos);
     }
-
 }

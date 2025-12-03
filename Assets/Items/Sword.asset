@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00edb3e0662650447962ae9325685897, type: 3}
+  m_Name: Sword
+  m_EditorClassIdentifier: 
+  itemName: Sword
+  description: 
+  icon: {fileID: 0}
+  maxStackSize: 1
+  itemType: 3
+  healthRestore: 0
+  hungerRestore: 0
+  hydrationRestore: 0
+  damage: 25
+  attackRange: 1.8
+  attackCooldown: 0.5
