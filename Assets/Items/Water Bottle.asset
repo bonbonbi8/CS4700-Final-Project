@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Water Bottle
   description: 
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: f9b4b597bab0b014084eec5ecdc78eca, type: 3}
   maxStackSize: 10
   itemType: 1
   healthRestore: 0

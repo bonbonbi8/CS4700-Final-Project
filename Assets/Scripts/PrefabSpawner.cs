@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class CampandPointSpawner : MonoBehaviour
+public class PrefabSpawner : MonoBehaviour
 {
     [System.Serializable]
     public class SpawnEntry
