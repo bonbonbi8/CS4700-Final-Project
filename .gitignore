@@ -1,7 +1,6 @@
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
-[Bb]uild*/
 [Bb]uilds/
 [Ll]ogs/
 [Mm]emoryCaptures/
@@ -17,4 +16,6 @@ UserSettings/
 *.mdb
 *.opendb
 *.VC.db
+*.docx
+*.wav
 .DS_Store
