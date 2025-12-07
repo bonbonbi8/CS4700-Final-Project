@@ -5,6 +5,7 @@
 [Ll]ogs/
 [Mm]emoryCaptures/
 UserSettings/
+Assets/Audio/
 .vs/
 *.csproj
 *.sln
