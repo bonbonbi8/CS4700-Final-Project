@@ -18,4 +18,5 @@ Assets/Audio/
 *.opendb
 *.VC.db
 *.docx
+*.wav
 .DS_Store
