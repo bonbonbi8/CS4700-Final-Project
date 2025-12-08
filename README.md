@@ -19,7 +19,7 @@
 - **Equipment System**: Equip and switch between different weapons/tools
 - **Combat System**: Attack mechanics with hit detection and damage
 - **Enemy System**: Enemies with health, AI, and death mechanics
-- **Input Handling**: Mouse click to attack, proper input system integration
+- **Input Handling**: Spacebar to attack, proper input system integration
 
 ## Setup Instructions
 Go to https://enhhi.itch.io/last-ember and download the zip file. Unzip it and run LastEmber.exe.
