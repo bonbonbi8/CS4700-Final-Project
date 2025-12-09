@@ -1,5 +1,8 @@
 # CS4700 Final Project - Last Ember
 
+## Setup Instructions
+Go to https://enhhi.itch.io/last-ember and download the zip file. Unzip it and run LastEmber.exe.
+
 ## Features
 
 ### System 1: Crafting System
@@ -21,9 +24,6 @@
 - **Enemy System**: Enemies with health, AI, and death mechanics
 - **Input Handling**: Spacebar to attack, proper input system integration
 
-## Setup Instructions
-Go to https://enhhi.itch.io/last-ember and download the zip file. Unzip it and run LastEmber.exe.
-
 ## Video Demonstration
 
-Will add soon
+https://youtu.be/xaiQFpXhHaY
